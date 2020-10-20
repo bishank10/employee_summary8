@@ -13,6 +13,7 @@ const managerGenerator = require("./lib/Manager");
 const employeeGenerator = require("./lib/Employee");
 const internGenerator = require("./lib/Intern");
 
+// this function here allows the user to select a title
 const chooseTitle = [
     {
     type: "list",
@@ -21,6 +22,8 @@ const chooseTitle = [
     choices : ["manager","employee","engineer","intern"]
     }
 ];
+
+// this function receives a response and follows throws by checking the given condition
 
 inquirer.prompt(chooseTitle)
 .then (
