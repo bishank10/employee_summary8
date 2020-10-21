@@ -1,4 +1,3 @@
- const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
 const inquirer = require("inquirer");
@@ -9,62 +8,162 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
-const managerGenerator = require("./lib/Manager");
-const employeeGenerator = require("./lib/Employee");
-const internGenerator = require("./lib/Intern");
+const Manager = require("./lib/Manager");
+const Employee = require("./lib/Employee")
+let teamMember = [];
+let idArr = [];
 
-// this function here allows the user to select a title
-const chooseTitle = [
-    {
-    type: "list",
-    message: "Please select a title?",
-    name: "title",
-    choices : ["manager","employee","engineer","intern"]
+// here the user choose the title which satisfies and runs the selected function
+function menu() {
+    function chooseTitle() {
+        inquirer
+            .prompt({
+                type: "list",
+                message: "Please select a title?",
+                name: "title",
+                choices: ["manager", "engineer", "intern", "done"]
+            })
+            .then(response => {
+                switch (response.title) {
+                    case "manager":
+                        mangerQuestions()
+                        break;
+
+                    case "engineer":
+                        engineerQuestions()
+                        break;
+
+                    case "intern":
+                        internQuestions()
+                        break;
+
+                    case "done":
+                        buildHtml()
+                        break;
+
+                }
+
+            })
+
     }
-];
 
-// this function receives a response and follows throws by checking the given condition
-
-inquirer.prompt(chooseTitle)
-.then (
-(response) => {
-    if(response.title === "manager") {
-        managerGenerator()
-    } 
-    else if (response.title === "employee"){
-        employeeGenerator()
+// this function is called when the user in done
+    function buildHtml(){
+        if(!fs.existsSync(OUTPUT_DIR)){
+            fs.mkdirSync(OUTPUT_DIR)
+        }
+        fs.writeFileSync(outputPath, render(teamMember), "utf-8")
     }
-    else if (response.title === "engineer"){
-        engineerGenerator()
+
+    //  if user selects manager this function is called upon
+    function mangerQuestions() {
+        inquirer.prompt(
+            [
+                {
+                    type: "input",
+                    message: "whats your name?",
+                    name: "name"
+                },
+                {
+                    type: "input",
+                    message: "Enter your email address?",
+                    name: "email"
+                },
+                {
+                    type: "input",
+                    message: "Enter the office number?",
+                    name: "officenum"
+                },
+                {
+                    type: "input",
+                    message: "Enter your id?",
+                    name: "id"
+                },
+                {
+                    type: "input",
+                    message: "Enter your github username",
+                    name: "github"
+                }
+            ]
+        )
+            .then(response => {
+                console.log(response);
+                const manager = new Manager(response.name, response.email, response.id, response.officenum);
+                teamMember.push(manager);
+
+                chooseTitle();
+            })
     }
-     else{
-        internGenerator()
+
+
+// this function is called upon when user selects the title as engineer
+    function engineerQuestions() {
+        inquirer.prompt([
+                {
+                  type: "input",
+                  message: "whats your name?",
+                  name: "name"
+                },
+                {
+                  type: "input",
+                  message: "Enter your email address?",
+                  name: "email"
+                },
+                {
+                  type: "input",
+                  message: "Enter the employee id?",
+                  name: "id"
+                },
+                {
+                  type: "input",
+                  message: "Enter your github username",
+                  name: "github"
+                }
+              ])
+            .then(response => {
+                console.log(response);
+                const engineer = new Engineer(response.name, response.email, response.id, response.github);
+                teamMember.push(engineer);
+
+                chooseTitle();
+            })
     }
+
+
+    function internQuestions() {
+        inquirer.prompt( 
+            [
+                {
+                  type: "input",
+                  message: "whats your name?",
+                  name: "name"
+                },
+                {
+                  type: "input",
+                  message: "Enter your email address?",
+                  name: "email"
+                },
+                {
+                    type: "input",
+                    message: "Enter your id??",
+                    name: "eid"
+                  },
+                
+                {
+                  type: "input",
+                  message: "Enter your school name?",
+                  name: "school"
+                }
+              ]
+              )
+            .then(response => {
+                console.log(response);
+                const engineer = new Intern(response.name, response.email, response.id, response.schoolName);
+                teamMember.push(engineer);
+
+                chooseTitle();
+            })
     }
-    );
-
-
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+    chooseTitle();
+}
+menu();
